@@ -11,6 +11,7 @@ let blob = JSON.parse(localStorage.getItem('blob')) || {
     width: 30,
     height: 30,
     hp: 100,
+    maxHp: 100,
     damage: 10,
     attackSpeed: 1000,
     gold: 0,
@@ -19,6 +20,7 @@ let blob = JSON.parse(localStorage.getItem('blob')) || {
 let enemies = [];
 let enemySpawnInterval = 2000;
 let enemyDamage = 5;
+let isAttacking = false;
 
 function saveProgress() {
     localStorage.setItem('blob', JSON.stringify(blob));
@@ -31,6 +33,7 @@ function spawnEnemy() {
         width: 30,
         height: 30,
         hp: 30,
+        maxHp: 30,
     };
     enemies.push(enemy);
 }
@@ -61,28 +64,46 @@ function collision(rect1, rect2) {
 }
 
 function attack() {
-    for (let i = 0; i < enemies.length; i++) {
-        if (collision(blob, enemies[i])) {
-            enemies[i].hp -= blob.damage;
-            if (enemies[i].hp <= 0) {
-                blob.gold += 10;
-                enemies.splice(i, 1);
-                i--;
+    isAttacking = true;
+    setTimeout(() => {
+        for (let i = 0; i < enemies.length; i++) {
+            if (collision(blob, enemies[i])) {
+                enemies[i].hp -= blob.damage;
+                if (enemies[i].hp <= 0) {
+                    blob.gold += 10;
+                    enemies.splice(i, 1);
+                    i--;
+                }
             }
         }
-    }
+        isAttacking = false;
+    }, blob.attackSpeed);
+}
+
+function drawHealthBar(x, y, width, height, hp, maxHp) {
+    const healthRatio = hp / maxHp;
+    ctx.fillStyle = 'red';
+    ctx.fillRect(x, y, width, height);
+    ctx.fillStyle = 'green';
+    ctx.fillRect(x, y, width * healthRatio, height);
 }
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = 'blue';
+
+    // Draw blob
+    ctx.fillStyle = isAttacking ? 'yellow' : 'blue'; // Change color when attacking
     ctx.fillRect(blob.x, blob.y, blob.width, blob.height);
-    
+    drawHealthBar(blob.x, blob.y - 10, blob.width, 5, blob.hp, blob.maxHp);
+
+    // Draw enemies
     ctx.fillStyle = 'red';
     for (const enemy of enemies) {
         ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+        drawHealthBar(enemy.x, enemy.y - 10, enemy.width, 5, enemy.hp, enemy.maxHp);
     }
 
+    // Draw stats
     ctx.fillStyle = 'black';
     ctx.fillText(`Gold: ${blob.gold}`, 10, 20);
     ctx.fillText(`HP: ${blob.hp}`, 10, 40);
@@ -90,7 +111,6 @@ function draw() {
 
 function gameLoop() {
     updateEnemies();
-    attack();
     draw();
     saveProgress(); // Save progress every frame
     requestAnimationFrame(gameLoop);
@@ -98,6 +118,7 @@ function gameLoop() {
 
 function resetGame() {
     blob.hp = 100;
+    blob.maxHp = 100;
     blob.gold = 0;
     blob.damage = 10;
     blob.attackSpeed = 1000;
@@ -106,8 +127,6 @@ function resetGame() {
 }
 
 setInterval(spawnEnemy, enemySpawnInterval);
-setInterval(() => {
-    blob.attackSpeed = Math.max(100, blob.attackSpeed - 10);
-}, blob.attackSpeed);
+setInterval(attack, blob.attackSpeed);
 
 gameLoop();
