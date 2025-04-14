@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blob Fighter Game</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auto Blob Battle</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div id="controls">
-        <button onclick="resetGame()">Reset Game</button>
-    </div>
-    <div id="game-container"></div>
-    <script src="game.js"></script>
+  <canvas id="gameCanvas"></canvas>
+  <div id="ui">
+    <div>HP: <span id="hp">100</span></div>
+    <div>Gold: <span id="gold">0</span></div>
+    <button onclick="upgradeAttack()">Upgrade Attack (+1)</button>
+  </div>
+
+  <script src="game.js"></script>
 </body>
 </html>
