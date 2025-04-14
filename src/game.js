@@ -1,9 +1,7 @@
 const gameContainer = document.getElementById('game-container');
-const blobElement = document.getElementById('blob');
-const enemiesContainer = document.getElementById('enemies');
 
-// Load saved data or initialize blob
-let blob = JSON.parse(localStorage.getItem('blob')) || {
+// Initialize blob
+let blob = {
     x: 385,
     y: 560,
     width: 30,
@@ -13,16 +11,19 @@ let blob = JSON.parse(localStorage.getItem('blob')) || {
     damage: 10,
     attackSpeed: 1000,
     gold: 0,
+    element: document.createElement('div'),
 };
+
+// Add blob to the game container
+blob.element.classList.add('blob');
+blob.element.style.left = `${blob.x}px`;
+blob.element.style.top = `${blob.y}px`;
+gameContainer.appendChild(blob.element);
 
 let enemies = [];
 let enemySpawnInterval = 2000;
 let enemyDamage = 5;
 let isAttacking = false;
-
-function saveProgress() {
-    localStorage.setItem('blob', JSON.stringify(blob));
-}
 
 function spawnEnemy() {
     const enemy = {
@@ -36,6 +37,7 @@ function spawnEnemy() {
     };
     enemy.element.classList.add('enemy');
     enemy.element.style.left = `${enemy.x}px`;
+    enemy.element.style.top = `${enemy.y}px`;
     gameContainer.appendChild(enemy.element);
     enemies.push(enemy);
 }
@@ -72,7 +74,7 @@ function collision(rect1, rect2) {
 
 function attack() {
     isAttacking = true;
-    blobElement.style.backgroundColor = 'yellow'; // Change blob color to indicate attack
+    blob.element.style.backgroundColor = 'yellow'; // Change blob color to indicate attack
     setTimeout(() => {
         for (let i = 0; i < enemies.length; i++) {
             const enemy = enemies[i];
@@ -87,7 +89,7 @@ function attack() {
             }
         }
         isAttacking = false;
-        blobElement.style.backgroundColor = 'blue'; // Reset blob color
+        blob.element.style.backgroundColor = 'blue'; // Reset blob color
     }, blob.attackSpeed);
 }
 
@@ -99,12 +101,10 @@ function resetGame() {
     blob.attackSpeed = 1000;
     enemies.forEach(enemy => gameContainer.removeChild(enemy.element));
     enemies = [];
-    saveProgress();
 }
 
 function gameLoop() {
     updateEnemies();
-    saveProgress(); // Save progress every frame
     requestAnimationFrame(gameLoop);
 }
 
