@@ -145,6 +145,25 @@ function generatePassiveGold() {
   saveProgress();
 }
 
+// Function to reset all progress
+function resetProgress() {
+  localStorage.clear(); // Clear all saved data
+  blob = {
+    x: canvas.width / 2 - 15,
+    y: canvas.height - 50,
+    width: 30,
+    height: 30,
+    hp: 100,
+    maxHp: 100,
+    damage: 1, // Reset attack damage to 1
+    attackSpeed: 1000,
+    gold: 0,
+  };
+  enemies = [];
+  saveProgress(); // Save the reset state
+  alert("Progress has been reset!");
+}
+
 // Spawn enemies at intervals
 setInterval(spawnEnemy, enemySpawnInterval);
 
