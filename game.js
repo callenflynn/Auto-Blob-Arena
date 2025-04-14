@@ -139,8 +139,17 @@ function upgradeAttack() {
   }
 }
 
+// Passive gold generation
+function generatePassiveGold() {
+  blob.gold += 1;
+  saveProgress();
+}
+
 // Spawn enemies at intervals
 setInterval(spawnEnemy, enemySpawnInterval);
+
+// Generate passive gold every 5 seconds
+setInterval(generatePassiveGold, 5000);
 
 // Start game loop
 gameLoop();
