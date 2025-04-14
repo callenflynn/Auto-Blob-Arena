@@ -14,11 +14,13 @@ let blob = JSON.parse(localStorage.getItem("blob")) || {
   damage: 1, // Default attack damage set to 1
   attackSpeed: 1000,
   gold: 0,
+  upgradeCost: 5, // Initial cost for upgrading attack
 };
 
 let enemies = [];
 let enemySpawnInterval = 2000;
 let enemyDamage = 5;
+let enemyHealth = 1; // Enemies start with 1 HP
 
 // Save progress to localStorage
 function saveProgress() {
@@ -32,7 +34,7 @@ function spawnEnemy() {
     y: Math.random() * (canvas.height / 2), // Spawn enemies in the top half of the canvas
     width: 30,
     height: 30,
-    hp: 30,
+    hp: enemyHealth, // Enemies' health increases over time
     speed: 1 + Math.random(), // Random speed for enemies
   };
   enemies.push(enemy);
@@ -124,15 +126,18 @@ function resetGame() {
   blob.gold = 0;
   blob.damage = 1; // Reset attack damage to 1
   blob.attackSpeed = 1000;
+  blob.upgradeCost = 5; // Reset upgrade cost
   enemies = [];
+  enemyHealth = 1; // Reset enemy health
   saveProgress(); // Save reset state
 }
 
 // Upgrade attack
 function upgradeAttack() {
-  if (blob.gold >= 20) {
-    blob.gold -= 20;
+  if (blob.gold >= blob.upgradeCost) {
+    blob.gold -= blob.upgradeCost;
     blob.damage += 1;
+    blob.upgradeCost = Math.ceil(blob.upgradeCost * 1.5); // Increase cost by 50%
     saveProgress();
   } else {
     alert("Not enough gold!");
@@ -145,23 +150,9 @@ function generatePassiveGold() {
   saveProgress();
 }
 
-// Function to reset all progress
-function resetProgress() {
-  localStorage.clear(); // Clear all saved data
-  blob = {
-    x: canvas.width / 2 - 15,
-    y: canvas.height - 50,
-    width: 30,
-    height: 30,
-    hp: 100,
-    maxHp: 100,
-    damage: 1, // Reset attack damage to 1
-    attackSpeed: 1000,
-    gold: 0,
-  };
-  enemies = [];
-  saveProgress(); // Save the reset state
-  alert("Progress has been reset!");
+// Increase enemy health over time
+function increaseEnemyHealth() {
+  enemyHealth += 1; // Increase enemy health by 1
 }
 
 // Spawn enemies at intervals
@@ -169,6 +160,9 @@ setInterval(spawnEnemy, enemySpawnInterval);
 
 // Generate passive gold every 5 seconds
 setInterval(generatePassiveGold, 5000);
+
+// Increase enemy health every 10 seconds
+setInterval(increaseEnemyHealth, 10000);
 
 // Start game loop
 gameLoop();
