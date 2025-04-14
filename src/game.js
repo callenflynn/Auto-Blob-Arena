@@ -1,13 +1,11 @@
-const canvas = document.createElement('canvas');
-const ctx = canvas.getContext('2d');
-document.body.appendChild(canvas);
-canvas.width = 800;
-canvas.height = 600;
+const gameContainer = document.getElementById('game-container');
+const blobElement = document.getElementById('blob');
+const enemiesContainer = document.getElementById('enemies');
 
 // Load saved data or initialize blob
 let blob = JSON.parse(localStorage.getItem('blob')) || {
-    x: canvas.width / 2,
-    y: canvas.height - 50,
+    x: 385,
+    y: 560,
     width: 30,
     height: 30,
     hp: 100,
@@ -28,24 +26,33 @@ function saveProgress() {
 
 function spawnEnemy() {
     const enemy = {
-        x: Math.random() * (canvas.width - 30),
+        x: Math.random() * (gameContainer.offsetWidth - 30),
         y: 0,
         width: 30,
         height: 30,
         hp: 30,
         maxHp: 30,
+        element: document.createElement('div'),
     };
+    enemy.element.classList.add('enemy');
+    enemy.element.style.left = `${enemy.x}px`;
+    gameContainer.appendChild(enemy.element);
     enemies.push(enemy);
 }
 
 function updateEnemies() {
     for (let i = 0; i < enemies.length; i++) {
-        enemies[i].y += 2; // Move enemies down
-        if (enemies[i].y > canvas.height) {
+        const enemy = enemies[i];
+        enemy.y += 2; // Move enemies down
+        enemy.element.style.top = `${enemy.y}px`;
+
+        if (enemy.y > gameContainer.offsetHeight) {
+            gameContainer.removeChild(enemy.element);
             enemies.splice(i, 1);
             i--;
-        } else if (collision(blob, enemies[i])) {
+        } else if (collision(blob, enemy)) {
             blob.hp -= enemyDamage;
+            gameContainer.removeChild(enemy.element);
             enemies.splice(i, 1);
             i--;
             if (blob.hp <= 0) {
@@ -65,55 +72,23 @@ function collision(rect1, rect2) {
 
 function attack() {
     isAttacking = true;
+    blobElement.style.backgroundColor = 'yellow'; // Change blob color to indicate attack
     setTimeout(() => {
         for (let i = 0; i < enemies.length; i++) {
-            if (collision(blob, enemies[i])) {
-                enemies[i].hp -= blob.damage;
-                if (enemies[i].hp <= 0) {
+            const enemy = enemies[i];
+            if (collision(blob, enemy)) {
+                enemy.hp -= blob.damage;
+                if (enemy.hp <= 0) {
                     blob.gold += 10;
+                    gameContainer.removeChild(enemy.element);
                     enemies.splice(i, 1);
                     i--;
                 }
             }
         }
         isAttacking = false;
+        blobElement.style.backgroundColor = 'blue'; // Reset blob color
     }, blob.attackSpeed);
-}
-
-function drawHealthBar(x, y, width, height, hp, maxHp) {
-    const healthRatio = hp / maxHp;
-    ctx.fillStyle = 'red';
-    ctx.fillRect(x, y, width, height);
-    ctx.fillStyle = 'green';
-    ctx.fillRect(x, y, width * healthRatio, height);
-}
-
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw blob
-    ctx.fillStyle = isAttacking ? 'yellow' : 'blue'; // Change color when attacking
-    ctx.fillRect(blob.x, blob.y, blob.width, blob.height);
-    drawHealthBar(blob.x, blob.y - 10, blob.width, 5, blob.hp, blob.maxHp);
-
-    // Draw enemies
-    ctx.fillStyle = 'red';
-    for (const enemy of enemies) {
-        ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-        drawHealthBar(enemy.x, enemy.y - 10, enemy.width, 5, enemy.hp, enemy.maxHp);
-    }
-
-    // Draw stats
-    ctx.fillStyle = 'black';
-    ctx.fillText(`Gold: ${blob.gold}`, 10, 20);
-    ctx.fillText(`HP: ${blob.hp}`, 10, 40);
-}
-
-function gameLoop() {
-    updateEnemies();
-    draw();
-    saveProgress(); // Save progress every frame
-    requestAnimationFrame(gameLoop);
 }
 
 function resetGame() {
@@ -122,8 +97,15 @@ function resetGame() {
     blob.gold = 0;
     blob.damage = 10;
     blob.attackSpeed = 1000;
+    enemies.forEach(enemy => gameContainer.removeChild(enemy.element));
     enemies = [];
-    saveProgress(); // Save reset state
+    saveProgress();
+}
+
+function gameLoop() {
+    updateEnemies();
+    saveProgress(); // Save progress every frame
+    requestAnimationFrame(gameLoop);
 }
 
 setInterval(spawnEnemy, enemySpawnInterval);
