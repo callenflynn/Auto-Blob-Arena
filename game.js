@@ -11,7 +11,7 @@ let blob = JSON.parse(localStorage.getItem("blob")) || {
   height: 30,
   hp: 100,
   maxHp: 100,
-  damage: 10,
+  damage: 1, // Default attack damage set to 1
   attackSpeed: 1000,
   gold: 0,
 };
@@ -29,22 +29,31 @@ function saveProgress() {
 function spawnEnemy() {
   const enemy = {
     x: Math.random() * (canvas.width - 30),
-    y: 0,
+    y: Math.random() * (canvas.height / 2), // Spawn enemies in the top half of the canvas
     width: 30,
     height: 30,
     hp: 30,
+    speed: 1 + Math.random(), // Random speed for enemies
   };
   enemies.push(enemy);
 }
 
-// Update enemies
+// Update enemies to move toward the blob
 function updateEnemies() {
   for (let i = 0; i < enemies.length; i++) {
-    enemies[i].y += 2; // Move enemies down
-    if (enemies[i].y > canvas.height) {
-      enemies.splice(i, 1);
-      i--;
-    } else if (collision(blob, enemies[i])) {
+    const enemy = enemies[i];
+
+    // Calculate direction toward the blob
+    const dx = blob.x + blob.width / 2 - (enemy.x + enemy.width / 2);
+    const dy = blob.y + blob.height / 2 - (enemy.y + enemy.height / 2);
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Normalize direction and move enemy
+    enemy.x += (dx / distance) * enemy.speed;
+    enemy.y += (dy / distance) * enemy.speed;
+
+    // Check if enemy collides with the blob
+    if (collision(blob, enemy)) {
       blob.hp -= enemyDamage;
       enemies.splice(i, 1);
       i--;
@@ -69,14 +78,10 @@ function collision(rect1, rect2) {
 // Blob attacks enemies
 function attack() {
   for (let i = 0; i < enemies.length; i++) {
-    if (
-      blob.x < enemies[i].x + enemies[i].width &&
-      blob.x + blob.width > enemies[i].x &&
-      blob.y < enemies[i].y + enemies[i].height &&
-      blob.y + blob.height > enemies[i].y
-    ) {
-      enemies[i].hp -= blob.damage;
-      if (enemies[i].hp <= 0) {
+    const enemy = enemies[i];
+    if (collision(blob, enemy)) {
+      enemy.hp -= blob.damage;
+      if (enemy.hp <= 0) {
         blob.gold += 10;
         enemies.splice(i, 1);
         i--;
@@ -117,7 +122,7 @@ function gameLoop() {
 function resetGame() {
   blob.hp = blob.maxHp;
   blob.gold = 0;
-  blob.damage = 10;
+  blob.damage = 1; // Reset attack damage to 1
   blob.attackSpeed = 1000;
   enemies = [];
   saveProgress(); // Save reset state
