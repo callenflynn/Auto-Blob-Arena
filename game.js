@@ -11,10 +11,12 @@ let blob = JSON.parse(localStorage.getItem("blob")) || {
   height: 30,
   hp: 100,
   maxHp: 100,
-  damage: 1, // Default attack damage set to 1
+  damage: 1, // Default attack damage per second
   attackSpeed: 1000,
+  range: 50, // Default attack range
   gold: 0,
   upgradeCost: 5, // Initial cost for upgrading attack
+  rangeUpgradeCost: 10, // Initial cost for upgrading range
 };
 
 let enemies = [];
@@ -77,14 +79,21 @@ function collision(rect1, rect2) {
   );
 }
 
-// Blob attacks enemies
+// Blob attacks enemies within range
 function attack() {
   for (let i = 0; i < enemies.length; i++) {
     const enemy = enemies[i];
-    if (collision(blob, enemy)) {
-      enemy.hp -= blob.damage;
+
+    // Calculate distance to enemy
+    const dx = blob.x + blob.width / 2 - (enemy.x + enemy.width / 2);
+    const dy = blob.y + blob.height / 2 - (enemy.y + enemy.height / 2);
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Check if enemy is within range
+    if (distance <= blob.range) {
+      enemy.hp -= blob.damage / (1000 / blob.attackSpeed); // Damage per second
       if (enemy.hp <= 0) {
-        blob.gold += 10;
+        blob.gold += enemyHealth; // Gain gold equal to enemy's health
         enemies.splice(i, 1);
         i--;
       }
@@ -111,6 +120,18 @@ function draw() {
   document.getElementById("gold").textContent = blob.gold;
 }
 
+// Upgrade attack range
+function upgradeRange() {
+  if (blob.gold >= blob.rangeUpgradeCost) {
+    blob.gold -= blob.rangeUpgradeCost;
+    blob.range += 20; // Increase range by 20
+    blob.rangeUpgradeCost = Math.ceil(blob.rangeUpgradeCost * 1.8); // Increase cost by 80%
+    saveProgress();
+  } else {
+    alert("Not enough gold!");
+  }
+}
+
 // Game loop
 function gameLoop() {
   updateEnemies();
@@ -125,23 +146,13 @@ function resetGame() {
   blob.hp = blob.maxHp;
   blob.gold = 0;
   blob.damage = 1; // Reset attack damage to 1
+  blob.range = 50; // Reset range to default
   blob.attackSpeed = 1000;
   blob.upgradeCost = 5; // Reset upgrade cost
+  blob.rangeUpgradeCost = 10; // Reset range upgrade cost
   enemies = [];
   enemyHealth = 1; // Reset enemy health
   saveProgress(); // Save reset state
-}
-
-// Upgrade attack
-function upgradeAttack() {
-  if (blob.gold >= blob.upgradeCost) {
-    blob.gold -= blob.upgradeCost;
-    blob.damage += 1;
-    blob.upgradeCost = Math.ceil(blob.upgradeCost * 1.5); // Increase cost by 50%
-    saveProgress();
-  } else {
-    alert("Not enough gold!");
-  }
 }
 
 // Passive gold generation
