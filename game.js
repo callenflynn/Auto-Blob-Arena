@@ -13,7 +13,7 @@ let blob = JSON.parse(localStorage.getItem("blob")) || {
   maxHp: 100,
   damage: 1, // Default attack damage per second
   attackSpeed: 1000,
-  range: 50, // Default attack range
+  range: 100, // Default range to hit enemies before they reach the blob
   gold: 0,
   upgradeCost: 5, // Initial cost for upgrading attack
   rangeUpgradeCost: 10, // Initial cost for upgrading range
@@ -146,7 +146,7 @@ function resetGame() {
   blob.hp = blob.maxHp;
   blob.gold = 0;
   blob.damage = 1; // Reset attack damage to 1
-  blob.range = 50; // Reset range to default
+  blob.range = 100; // Reset range to default
   blob.attackSpeed = 1000;
   blob.upgradeCost = 5; // Reset upgrade cost
   blob.rangeUpgradeCost = 10; // Reset range upgrade cost
