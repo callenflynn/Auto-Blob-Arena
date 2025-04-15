@@ -151,13 +151,6 @@ function draw() {
   for (const enemy of enemies) {
     ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
   }
-
-  // Update UI
-  document.getElementById("hp").textContent = blob.hp;
-  document.getElementById("gold").textContent = blob.gold;
-
-  // Update button states
-  updateUpgradeButtons();
 }
 
 // Reset game
@@ -197,5 +190,14 @@ setInterval(increaseEnemyHealth, 10000);
 // Call `updateUpgradeButtons` initially to set button text
 updateUpgradeButtons();
 
-// Start game loop
+// Game loop
+function gameLoop() {
+  updateEnemies();
+  attack();
+  draw();
+  saveProgress(); // Save progress every frame
+  requestAnimationFrame(gameLoop);
+}
+
+// Start the game loop
 gameLoop();
