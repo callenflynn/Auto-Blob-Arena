@@ -20,6 +20,7 @@ let blob = JSON.parse(localStorage.getItem("blob")) || {
 };
 
 blob.attackSpeed = Math.max(blob.attackSpeed, 100); // Minimum 100ms
+blob.gold = Math.max(blob.gold, 0); // Ensure gold is not negative
 
 let enemies = [];
 let bullets = []; // Track active bullets
@@ -89,7 +90,8 @@ function attack() {
     if (distance <= blob.range) {
       enemy.hp -= blob.damage;
       if (enemy.hp <= 0) {
-        blob.gold += enemyHealth; // Gain gold equal to the enemy's health
+        blob.gold += Math.floor(enemy.hp / 2); // Gain half the enemy's health as coins
+        blob.gold = Math.max(blob.gold, 0); // Ensure gold is not negative
         enemies.splice(i, 1);
         i--;
       }
@@ -101,6 +103,7 @@ function attack() {
 function upgradeAttack() {
   if (blob.gold >= blob.upgradeCost) {
     blob.gold -= blob.upgradeCost;
+    blob.gold = Math.max(blob.gold, 0); // Ensure gold is not negative
     blob.damage += 1; // Increase damage by 1
     blob.upgradeCost = Math.ceil(blob.upgradeCost * 1.5); // Increase cost by 50%
     updateUpgradeButtons(); // Update button text
@@ -114,6 +117,7 @@ function upgradeAttack() {
 function upgradeRange() {
   if (blob.gold >= blob.rangeUpgradeCost) {
     blob.gold -= blob.rangeUpgradeCost;
+    blob.gold = Math.max(blob.gold, 0); // Ensure gold is not negative
     blob.range += 20; // Increase range by 20
     blob.rangeUpgradeCost = Math.ceil(blob.rangeUpgradeCost * 1.8); // Increase cost by 80%
     updateUpgradeButtons(); // Update button text
@@ -177,6 +181,7 @@ function resetGame() {
     rangeUpgradeCost: 10,
   };
   blob.attackSpeed = Math.max(blob.attackSpeed, 100); // Minimum 100ms
+  blob.gold = Math.max(blob.gold, 0); // Ensure gold is not negative
   enemies = [];
   bullets = [];
   enemyHealth = 1;
@@ -265,7 +270,8 @@ function checkBulletCollisions() {
         i--;
 
         if (enemy.hp <= 0) {
-          blob.gold += enemy.hp; // Gain gold equal to the enemy's health
+          blob.gold += Math.floor(enemy.hp / 2); // Gain half the enemy's health as coins
+          blob.gold = Math.max(blob.gold, 0); // Ensure gold is not negative
           enemies.splice(j, 1);
           j--;
         }
