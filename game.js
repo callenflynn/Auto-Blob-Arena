@@ -151,6 +151,10 @@ function draw() {
   for (const enemy of enemies) {
     ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
   }
+
+  // Update UI
+  document.getElementById("gold").textContent = Math.floor(blob.gold);
+  document.getElementById("hp").textContent = Math.floor(blob.hp);
 }
 
 // Reset game
