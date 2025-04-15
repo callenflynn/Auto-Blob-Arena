@@ -89,7 +89,7 @@ function attack() {
     if (distance <= blob.range) {
       enemy.hp -= blob.damage;
       if (enemy.hp <= 0) {
-        blob.gold += enemy.hp; // Gain gold equal to the enemy's health
+        blob.gold += enemyHealth; // Gain gold equal to the enemy's health
         enemies.splice(i, 1);
         i--;
       }
@@ -145,6 +145,10 @@ function draw() {
   for (const enemy of enemies) {
     ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
   }
+
+  // Update UI
+  document.getElementById("hp").textContent = blob.hp;
+  document.getElementById("gold").textContent = blob.gold; // Update gold counter
 }
 
 // Draw bullets
