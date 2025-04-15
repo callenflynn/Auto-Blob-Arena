@@ -101,6 +101,26 @@ function attack() {
   }
 }
 
+// Upgrade attack damage
+function upgradeAttack() {
+  if (blob.gold >= blob.upgradeCost) {
+    blob.gold -= blob.upgradeCost;
+    blob.damage += 1; // Increase damage by 1
+    blob.upgradeCost = Math.ceil(blob.upgradeCost * 1.5); // Increase cost by 50%
+    updateUpgradeButtons(); // Update button text
+    saveProgress();
+  } else {
+    alert("Not enough gold!");
+  }
+}
+
+// Update the text on upgrade buttons
+function updateUpgradeButtons() {
+  document.getElementById("attackCost").textContent = blob.upgradeCost; // Update attack cost
+  document.getElementById("upgradeAttackButton").disabled = blob.gold < blob.upgradeCost; // Disable if insufficient gold
+  document.getElementById("upgradeRangeButton").disabled = blob.gold < blob.rangeUpgradeCost; // Disable if insufficient gold
+}
+
 // Draw everything
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -118,6 +138,9 @@ function draw() {
   // Update UI
   document.getElementById("hp").textContent = blob.hp;
   document.getElementById("gold").textContent = blob.gold;
+
+  // Update button states
+  updateUpgradeButtons();
 }
 
 // Upgrade attack range
@@ -126,19 +149,11 @@ function upgradeRange() {
     blob.gold -= blob.rangeUpgradeCost;
     blob.range += 20; // Increase range by 20
     blob.rangeUpgradeCost = Math.ceil(blob.rangeUpgradeCost * 1.8); // Increase cost by 80%
+    updateUpgradeButtons(); // Update button text
     saveProgress();
   } else {
     alert("Not enough gold!");
   }
-}
-
-// Game loop
-function gameLoop() {
-  updateEnemies();
-  attack();
-  draw();
-  saveProgress(); // Save progress every frame
-  requestAnimationFrame(gameLoop);
 }
 
 // Reset game
@@ -174,6 +189,9 @@ setInterval(generatePassiveGold, 5000);
 
 // Increase enemy health every 10 seconds
 setInterval(increaseEnemyHealth, 10000);
+
+// Call `updateUpgradeButtons` initially to set button text
+updateUpgradeButtons();
 
 // Start game loop
 gameLoop();
