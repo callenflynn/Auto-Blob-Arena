@@ -1,5 +1,5 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 canvas.width = 800;
 canvas.height = 600;
 
@@ -11,15 +11,18 @@ let blob = JSON.parse(localStorage.getItem("blob")) || {
   height: 30,
   hp: 100,
   maxHp: 100,
-  damage: 1, // Default attack damage per second
+  damage: 1,
   attackSpeed: 1000,
-  range: 100, // Default range to hit enemies before they reach the blob
+  range: 100,
   gold: 0,
-  upgradeCost: 5, // Initial cost for upgrading attack
-  rangeUpgradeCost: 10, // Initial cost for upgrading range
+  upgradeCost: 5,
+  rangeUpgradeCost: 10,
 };
 
+blob.attackSpeed = Math.max(blob.attackSpeed, 100); // Minimum 100ms
+
 let enemies = [];
+let bullets = []; // Track active bullets
 let enemySpawnInterval = 2000;
 let enemyDamage = 5;
 let enemyHealth = 1; // Enemies start with 1 HP
@@ -33,11 +36,11 @@ function saveProgress() {
 function spawnEnemy() {
   const enemy = {
     x: Math.random() * (canvas.width - 30),
-    y: Math.random() * (canvas.height / 2), // Spawn enemies in the top half of the canvas
+    y: Math.random() * (canvas.height / 2),
     width: 30,
     height: 30,
-    hp: enemyHealth, // Enemies' health increases over time
-    speed: 1 + Math.random(), // Random speed for enemies
+    hp: enemyHealth,
+    speed: 1 + Math.random(),
   };
   enemies.push(enemy);
 }
@@ -46,17 +49,13 @@ function spawnEnemy() {
 function updateEnemies() {
   for (let i = 0; i < enemies.length; i++) {
     const enemy = enemies[i];
-
-    // Calculate direction toward the blob
     const dx = blob.x + blob.width / 2 - (enemy.x + enemy.width / 2);
     const dy = blob.y + blob.height / 2 - (enemy.y + enemy.height / 2);
     const distance = Math.sqrt(dx * dx + dy * dy);
 
-    // Normalize direction and move enemy
     enemy.x += (dx / distance) * enemy.speed;
     enemy.y += (dy / distance) * enemy.speed;
 
-    // Check if enemy collides with the blob
     if (collision(blob, enemy)) {
       blob.hp -= enemyDamage;
       enemies.splice(i, 1);
@@ -83,19 +82,16 @@ function collision(rect1, rect2) {
 function attack() {
   for (let i = 0; i < enemies.length; i++) {
     const enemy = enemies[i];
-
-    // Calculate distance to enemy
     const dx = blob.x + blob.width / 2 - (enemy.x + enemy.width / 2);
     const dy = blob.y + blob.height / 2 - (enemy.y + enemy.height / 2);
     const distance = Math.sqrt(dx * dx + dy * dy);
 
-    // Check if enemy is within range
     if (distance <= blob.range) {
-      enemy.hp -= blob.damage; // Apply damage directly
+      enemy.hp -= blob.damage;
       if (enemy.hp <= 0) {
-        blob.gold += enemy.hp + blob.damage; // Add gold equal to enemy's starting health
-        enemies.splice(i, 1); // Remove enemy from the array
-        i--; // Adjust index after removal
+        blob.gold += enemyHealth;
+        enemies.splice(i, 1);
+        i--;
       }
     }
   }
@@ -129,13 +125,11 @@ function upgradeRange() {
 
 // Update the text on upgrade buttons
 function updateUpgradeButtons() {
-  // Update attack upgrade button
-  document.getElementById("attackCost").textContent = blob.upgradeCost; // Update attack cost
-  document.getElementById("upgradeAttackButton").disabled = blob.gold < blob.upgradeCost; // Disable if insufficient gold
+  document.getElementById("attackCost").textContent = blob.upgradeCost;
+  document.getElementById("upgradeAttackButton").disabled = blob.gold < blob.upgradeCost;
 
-  // Update range upgrade button
-  document.getElementById("rangeCost").textContent = blob.rangeUpgradeCost; // Update range cost
-  document.getElementById("upgradeRangeButton").disabled = blob.gold < blob.rangeUpgradeCost; // Disable if insufficient gold
+  document.getElementById("rangeCost").textContent = blob.rangeUpgradeCost;
+  document.getElementById("upgradeRangeButton").disabled = blob.gold < blob.rangeUpgradeCost;
 }
 
 // Draw everything
@@ -151,24 +145,40 @@ function draw() {
   for (const enemy of enemies) {
     ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
   }
+}
 
-  // Update UI
-  document.getElementById("gold").textContent = Math.floor(blob.gold);
-  document.getElementById("hp").textContent = Math.floor(blob.hp);
+// Draw bullets
+function drawBullets() {
+  ctx.fillStyle = "yellow";
+  for (const bullet of bullets) {
+    ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+  }
 }
 
 // Reset game
 function resetGame() {
-  blob.hp = blob.maxHp;
-  blob.gold = 0;
-  blob.damage = 1; // Reset attack damage to 1
-  blob.range = 100; // Reset range to default
-  blob.attackSpeed = 1000;
-  blob.upgradeCost = 5; // Reset upgrade cost
-  blob.rangeUpgradeCost = 10; // Reset range upgrade cost
+  localStorage.clear();
+  blob = {
+    x: canvas.width / 2 - 15,
+    y: canvas.height - 50,
+    width: 30,
+    height: 30,
+    hp: 100,
+    maxHp: 100,
+    damage: 1,
+    attackSpeed: 1000,
+    range: 100,
+    gold: 0,
+    upgradeCost: 5,
+    rangeUpgradeCost: 10,
+  };
+  blob.attackSpeed = Math.max(blob.attackSpeed, 100); // Minimum 100ms
   enemies = [];
-  enemyHealth = 1; // Reset enemy health
-  saveProgress(); // Save reset state
+  bullets = [];
+  enemyHealth = 1;
+  updateUpgradeButtons();
+  saveProgress();
+  alert("Game progress has been reset!");
 }
 
 // Passive gold generation
@@ -182,6 +192,56 @@ function increaseEnemyHealth() {
   enemyHealth += 1; // Increase enemy health by 1
 }
 
+// Fire a bullet
+function fireBullet() {
+  bullets.push({
+    x: blob.x + blob.width / 2 - 5,
+    y: blob.y,
+    width: 10,
+    height: 10,
+    speed: 5,
+  });
+}
+
+// Update bullets
+function updateBullets() {
+  for (let i = 0; i < bullets.length; i++) {
+    bullets[i].y -= bullets[i].speed;
+    if (bullets[i].y + bullets[i].height < 0) {
+      bullets.splice(i, 1);
+      i--;
+    }
+  }
+}
+
+// Check bullet collisions with enemies
+function checkBulletCollisions() {
+  for (let i = 0; i < bullets.length; i++) {
+    for (let j = 0; j < enemies.length; j++) {
+      const bullet = bullets[i];
+      const enemy = enemies[j];
+
+      if (
+        bullet.x < enemy.x + enemy.width &&
+        bullet.x + bullet.width > enemy.x &&
+        bullet.y < enemy.y + enemy.height &&
+        bullet.y + bullet.height > enemy.y
+      ) {
+        enemy.hp -= blob.damage;
+        bullets.splice(i, 1);
+        i--;
+
+        if (enemy.hp <= 0) {
+          blob.gold += enemy.hp;
+          enemies.splice(j, 1);
+          j--;
+        }
+        break;
+      }
+    }
+  }
+}
+
 // Spawn enemies at intervals
 setInterval(spawnEnemy, enemySpawnInterval);
 
@@ -191,15 +251,21 @@ setInterval(generatePassiveGold, 5000);
 // Increase enemy health every 10 seconds
 setInterval(increaseEnemyHealth, 10000);
 
+// Fire bullets at intervals based on attack speed
+setInterval(fireBullet, blob.attackSpeed);
+
 // Call `updateUpgradeButtons` initially to set button text
 updateUpgradeButtons();
 
 // Game loop
 function gameLoop() {
   updateEnemies();
+  updateBullets();
+  checkBulletCollisions();
   attack();
   draw();
-  saveProgress(); // Save progress every frame
+  drawBullets();
+  saveProgress();
   requestAnimationFrame(gameLoop);
 }
 
