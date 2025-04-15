@@ -103,9 +103,9 @@ function attack() {
 function upgradeAttack() {
   if (blob.gold >= blob.upgradeCost) {
     blob.gold -= blob.upgradeCost;
-    blob.gold = Math.max(blob.gold, 0); // Ensure gold is not negative
     blob.damage += 1; // Increase damage by 1
     blob.upgradeCost = Math.ceil(blob.upgradeCost * 1.5); // Increase cost by 50%
+    validateGold(); // Ensure gold is valid
     updateUpgradeButtons(); // Update button text
     saveProgress();
   } else {
@@ -117,9 +117,9 @@ function upgradeAttack() {
 function upgradeRange() {
   if (blob.gold >= blob.rangeUpgradeCost) {
     blob.gold -= blob.rangeUpgradeCost;
-    blob.gold = Math.max(blob.gold, 0); // Ensure gold is not negative
     blob.range += 20; // Increase range by 20
     blob.rangeUpgradeCost = Math.ceil(blob.rangeUpgradeCost * 1.8); // Increase cost by 80%
+    validateGold(); // Ensure gold is valid
     updateUpgradeButtons(); // Update button text
     saveProgress();
   } else {
@@ -193,6 +193,7 @@ function resetGame() {
 // Passive gold generation
 function generatePassiveGold() {
   blob.gold += 1;
+  validateGold(); // Ensure gold is valid
   saveProgress();
 }
 
@@ -271,13 +272,20 @@ function checkBulletCollisions() {
 
         if (enemy.hp <= 0) {
           blob.gold += Math.floor(enemy.hp / 2); // Gain half the enemy's health as coins
-          blob.gold = Math.max(blob.gold, 0); // Ensure gold is not negative
+          validateGold(); // Ensure gold is valid
           enemies.splice(j, 1);
           j--;
         }
         break;
       }
     }
+  }
+}
+
+// Validate gold value
+function validateGold() {
+  if (blob.gold < 0) {
+    blob.gold = 1; // Set gold to 1 if it goes below 0
   }
 }
 
