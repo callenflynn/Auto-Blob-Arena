@@ -120,7 +120,7 @@ function upgradeAttack() {
 function upgradeRange() {
   if (blob.gold >= blob.rangeUpgradeCost) {
     blob.gold -= blob.rangeUpgradeCost;
-    blob.range += 20; // Increase range by 20
+    blob.range += 10; // Increase range by 10
     blob.rangeUpgradeCost = Math.ceil(blob.rangeUpgradeCost * 1.8); // Increase cost by 80%
     validateGold(); // Ensure gold is valid
     updateUpgradeButtons(); // Update button text
@@ -178,10 +178,10 @@ function resetGame() {
     maxHp: 100,
     damage: 1,
     attackSpeed: 1000,
-    range: 100,
+    range: 50, // Default range set to a low value
     gold: 0,
-    upgradeCost: 5,
-    rangeUpgradeCost: 10,
+    upgradeCost: 5, // Reset attack upgrade cost
+    rangeUpgradeCost: 10, // Reset range upgrade cost
   };
   blob.attackSpeed = Math.max(blob.attackSpeed, 100); // Minimum 100ms
   blob.gold = Math.max(blob.gold, 0); // Ensure gold is not negative
