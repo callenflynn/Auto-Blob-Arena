@@ -88,12 +88,15 @@ function attack() {
     const distance = Math.sqrt(dx * dx + dy * dy);
 
     if (distance <= blob.range) {
-      enemy.hp -= blob.damage;
-      if (enemy.hp <= 0) {
-        blob.gold += Math.floor(enemy.hp / 2); // Gain half the enemy's health as coins
-        blob.gold = Math.max(blob.gold, 0); // Ensure gold is not negative
-        enemies.splice(i, 1);
+      // Check if the enemy will die from this hit
+      if (enemy.hp <= blob.damage) {
+        const goldReward = Math.max(Math.floor(enemy.hp / 2), 0); // Ensure positive reward
+        blob.gold += goldReward; // Gain gold
+        validateGold(); // Ensure gold is valid
+        enemies.splice(i, 1); // Remove the enemy
         i--;
+      } else {
+        enemy.hp -= blob.damage; // Reduce enemy health
       }
     }
   }
@@ -271,7 +274,8 @@ function checkBulletCollisions() {
 
         // Check if the enemy will die from this hit
         if (enemy.hp <= blob.damage) {
-          blob.gold += Math.floor(enemy.hp / 2); // Gain half the enemy's health as coins
+          const goldReward = Math.max(Math.floor(enemy.hp / 2), 0); // Ensure positive reward
+          blob.gold += goldReward; // Gain gold
           validateGold(); // Ensure gold is valid
           enemies.splice(j, 1); // Remove the enemy
           j--;
