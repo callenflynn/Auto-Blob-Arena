@@ -91,11 +91,11 @@ function attack() {
 
     // Check if enemy is within range
     if (distance <= blob.range) {
-      enemy.hp -= blob.damage / (1000 / blob.attackSpeed); // Damage per second
+      enemy.hp -= blob.damage; // Apply damage directly
       if (enemy.hp <= 0) {
-        blob.gold += enemyHealth; // Gain gold equal to enemy's health
-        enemies.splice(i, 1);
-        i--;
+        blob.gold += enemy.hp + blob.damage; // Add gold equal to enemy's starting health
+        enemies.splice(i, 1); // Remove enemy from the array
+        i--; // Adjust index after removal
       }
     }
   }
@@ -114,10 +114,27 @@ function upgradeAttack() {
   }
 }
 
+// Upgrade attack range
+function upgradeRange() {
+  if (blob.gold >= blob.rangeUpgradeCost) {
+    blob.gold -= blob.rangeUpgradeCost;
+    blob.range += 20; // Increase range by 20
+    blob.rangeUpgradeCost = Math.ceil(blob.rangeUpgradeCost * 1.8); // Increase cost by 80%
+    updateUpgradeButtons(); // Update button text
+    saveProgress();
+  } else {
+    alert("Not enough gold!");
+  }
+}
+
 // Update the text on upgrade buttons
 function updateUpgradeButtons() {
+  // Update attack upgrade button
   document.getElementById("attackCost").textContent = blob.upgradeCost; // Update attack cost
   document.getElementById("upgradeAttackButton").disabled = blob.gold < blob.upgradeCost; // Disable if insufficient gold
+
+  // Update range upgrade button
+  document.getElementById("rangeCost").textContent = blob.rangeUpgradeCost; // Update range cost
   document.getElementById("upgradeRangeButton").disabled = blob.gold < blob.rangeUpgradeCost; // Disable if insufficient gold
 }
 
@@ -141,19 +158,6 @@ function draw() {
 
   // Update button states
   updateUpgradeButtons();
-}
-
-// Upgrade attack range
-function upgradeRange() {
-  if (blob.gold >= blob.rangeUpgradeCost) {
-    blob.gold -= blob.rangeUpgradeCost;
-    blob.range += 20; // Increase range by 20
-    blob.rangeUpgradeCost = Math.ceil(blob.rangeUpgradeCost * 1.8); // Increase cost by 80%
-    updateUpgradeButtons(); // Update button text
-    saveProgress();
-  } else {
-    alert("Not enough gold!");
-  }
 }
 
 // Reset game
