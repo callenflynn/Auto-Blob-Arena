@@ -266,15 +266,17 @@ function checkBulletCollisions() {
         bullet.y < enemy.y + enemy.height &&
         bullet.y + bullet.height > enemy.y
       ) {
-        enemy.hp -= blob.damage;
-        bullets.splice(i, 1);
+        bullets.splice(i, 1); // Remove the bullet
         i--;
 
-        if (enemy.hp <= 0) {
+        // Check if the enemy will die from this hit
+        if (enemy.hp <= blob.damage) {
           blob.gold += Math.floor(enemy.hp / 2); // Gain half the enemy's health as coins
           validateGold(); // Ensure gold is valid
-          enemies.splice(j, 1);
+          enemies.splice(j, 1); // Remove the enemy
           j--;
+        } else {
+          enemy.hp -= blob.damage; // Reduce enemy health
         }
         break;
       }
