@@ -89,7 +89,7 @@ function attack() {
     if (distance <= blob.range) {
       enemy.hp -= blob.damage;
       if (enemy.hp <= 0) {
-        blob.gold += enemyHealth;
+        blob.gold += enemy.hp; // Gain gold equal to the enemy's health
         enemies.splice(i, 1);
         i--;
       }
@@ -194,20 +194,49 @@ function increaseEnemyHealth() {
 
 // Fire a bullet
 function fireBullet() {
+  if (enemies.length === 0) return; // No enemies to shoot at
+
+  // Find the nearest enemy
+  let nearestEnemy = enemies[0];
+  let minDistance = Infinity;
+  for (const enemy of enemies) {
+    const dx = blob.x + blob.width / 2 - (enemy.x + enemy.width / 2);
+    const dy = blob.y + blob.height / 2 - (enemy.y + enemy.height / 2);
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance < minDistance) {
+      minDistance = distance;
+      nearestEnemy = enemy;
+    }
+  }
+
+  // Calculate direction to the nearest enemy
+  const dx = nearestEnemy.x + nearestEnemy.width / 2 - (blob.x + blob.width / 2);
+  const dy = nearestEnemy.y + nearestEnemy.height / 2 - (blob.y + blob.height / 2);
+  const magnitude = Math.sqrt(dx * dx + dy * dy);
+
   bullets.push({
     x: blob.x + blob.width / 2 - 5,
-    y: blob.y,
+    y: blob.y + blob.height / 2 - 5,
     width: 10,
     height: 10,
-    speed: 5,
+    speedX: (dx / magnitude) * 5, // Normalize and scale speed
+    speedY: (dy / magnitude) * 5,
   });
 }
 
 // Update bullets
 function updateBullets() {
   for (let i = 0; i < bullets.length; i++) {
-    bullets[i].y -= bullets[i].speed;
-    if (bullets[i].y + bullets[i].height < 0) {
+    bullets[i].x += bullets[i].speedX;
+    bullets[i].y += bullets[i].speedY;
+
+    // Remove bullet if it goes off the screen
+    if (
+      bullets[i].x + bullets[i].width < 0 ||
+      bullets[i].x > canvas.width ||
+      bullets[i].y + bullets[i].height < 0 ||
+      bullets[i].y > canvas.height
+    ) {
       bullets.splice(i, 1);
       i--;
     }
@@ -232,7 +261,7 @@ function checkBulletCollisions() {
         i--;
 
         if (enemy.hp <= 0) {
-          blob.gold += enemy.hp;
+          blob.gold += enemy.hp; // Gain gold equal to the enemy's health
           enemies.splice(j, 1);
           j--;
         }
