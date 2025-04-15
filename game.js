@@ -27,6 +27,7 @@ let bullets = []; // Track active bullets
 let enemySpawnInterval = 2000;
 let enemyDamage = 5;
 let enemyHealth = 1; // Enemies start with 1 HP
+let lastBulletTime = 0; // Track the last time a bullet was fired
 
 // Save progress to localStorage
 function saveProgress() {
@@ -304,23 +305,32 @@ setInterval(generatePassiveGold, 5000);
 // Increase enemy health every 10 seconds
 setInterval(increaseEnemyHealth, 10000);
 
-// Fire bullets at intervals based on attack speed
-setInterval(fireBullet, blob.attackSpeed);
+// Periodically check and update button states
+setInterval(updateUpgradeButtons, 2000); // Check every 2 seconds
 
 // Call `updateUpgradeButtons` initially to set button text
 updateUpgradeButtons();
 
 // Game loop
-function gameLoop() {
+function gameLoop(timestamp) {
+  if (!lastBulletTime) lastBulletTime = timestamp;
+
+  // Fire bullets based on attack speed
+  if (timestamp - lastBulletTime >= blob.attackSpeed) {
+    fireBullet();
+    lastBulletTime = timestamp;
+  }
+
   updateEnemies();
   updateBullets();
   checkBulletCollisions();
   attack();
   draw();
   drawBullets();
+  updateUpgradeButtons(); // Ensure buttons are updated every frame
   saveProgress();
   requestAnimationFrame(gameLoop);
 }
 
 // Start the game loop
-gameLoop();
+requestAnimationFrame(gameLoop);
