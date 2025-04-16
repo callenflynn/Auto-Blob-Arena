@@ -41,7 +41,7 @@ function spawnEnemy() {
     y: Math.random() * (canvas.height / 2),
     width: 30,
     height: 30,
-    hp: enemyHealth,
+    hp: Math.floor(blob.damage / 2) + enemyHealth, // Scale enemy health based on player's damage
     speed: 1 + Math.random(),
   };
   enemies.push(enemy);

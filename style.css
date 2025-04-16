@@ -5,8 +5,9 @@ body {
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background-color: #f0f0f0;
-  font-family: Arial, sans-serif;
+  background-color: #e0e7ff; /* Light blue background for a softer look */
+  font-family: 'Arial', sans-serif;
+  color: #333; /* Darker text for better readability */
 }
 
 canvas {
@@ -14,20 +15,47 @@ canvas {
 }
 
 #gameCanvas {
-  border: 1px solid black;
+  border: 3px solid #4a90e2; /* Blue border for a modern look */
+  border-radius: 10px; /* Rounded corners */
   display: block;
   margin: 0 auto;
-  background-color: white;
+  background-color: #ffffff; /* White canvas background */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
 }
 
 #ui {
-  margin-top: 10px;
+  margin-top: 20px;
   text-align: center;
+  background-color: #ffffff; /* White background for the UI */
+  padding: 15px 20px;
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
 }
 
 button {
-  margin-top: 10px;
+  margin: 10px 5px;
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
+  border: none;
+  border-radius: 5px; /* Rounded corners */
+  background-color: #4a90e2; /* Blue button background */
+  color: white; /* White text */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover effect */
+}
+
+button:hover {
+  background-color: #357ab8; /* Darker blue on hover */
+  transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+button:disabled {
+  background-color: #cccccc; /* Gray background for disabled buttons */
+  cursor: not-allowed;
+}
+
+#ui div {
+  margin: 5px 0;
+  font-size: 18px;
+  font-weight: bold;
 }
